@@ -18,6 +18,14 @@ function promisfyHapiGet(resourceTuple) {
         try {
           const { statusCode } = res;
           const parsedData = JSON.parse(data);
+          // if the resource is deleted hapi fhir will return a 410
+          // so just resolve nothing
+          // although need to handle it properly in the promise array
+          // otherwise you might have a blank object that gets posted to kafka
+          if (statusCode === 410) { 
+            res.resume();
+            return resolve();
+          }
           if (statusCode > 299) reject(new Error(data.toString()));
           else {
             delete parsedData.meta;
