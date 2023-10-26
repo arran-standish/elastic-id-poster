@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  elastic-enrich-reference:
+    image: node:gallium-alpine
+    networks:
+      hapi-fhir-postgres:
+    environment:
+      - INPUT_FILE=input.dat
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=hapi
+      - HAPI_PORT=8080
+      - HAPI_URL=hapi-fhir
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+      restart_policy:
+        condition: none
+      placement:
+        constraints:
+          - "node.labels.name==node-1"
+    command: sh -c "cd /app && npm run start && exit"
+    volumes:
+      - ../:/app
+
+networks:
+  hapi-fhir-postgres:
+    name: hapi-fhir_postgres_public
+    external: true
