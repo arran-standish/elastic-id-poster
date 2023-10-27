@@ -16,9 +16,6 @@ export async function execute(ids) {
     // so just need to add top level data: { resourceType: "Bundle", type: "transaction", entry: resourceData }
     // and should be good to go
     console.log({ resourceType: "Bundle", type: "transaction", entry: resourceData });
-
-    await postgresShutdown();
-    hapiShutdown();
   } catch (err) {
     console.error(err);
     await postgresShutdown();
