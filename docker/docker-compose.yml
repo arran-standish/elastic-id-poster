@@ -5,13 +5,19 @@ services:
     image: node:gallium-alpine
     networks:
       hapi-fhir-postgres:
+      hapi-fhir:
+      kafka:
     environment:
+      - ID_BATCH_SIZE=10
       - INPUT_FILE=input.dat
+      - PGHOST=postgres-1
       - PGUSER=postgres
       - PGPASSWORD=postgres
       - PGDATABASE=hapi
       - HAPI_PORT=8080
       - HAPI_URL=hapi-fhir
+      - KAFKA_URL=kafka-01:9092,kafka-02:9092,kafka-03:9092
+      - KAFKA_TOPIC=2xx
     deploy:
       resources:
         limits:
@@ -28,4 +34,10 @@ services:
 networks:
   hapi-fhir-postgres:
     name: hapi-fhir_postgres_public
+    external: true
+  hapi-fhir:
+    name: hapi-fhir_public
+    external: true
+  kafka:
+    name: kafka_public
     external: true

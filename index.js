@@ -2,7 +2,7 @@ import fs from 'fs';
 import readline from 'readline';
 import './config/index.js';
 import { flushCursor, getPreviousCursor } from './filesystem/cursor.js';
-import { execute } from './runner/index.js';
+import { execute, shutdown } from './runner/index.js';
 
 let cursorPosition;
 async function main() {
@@ -21,16 +21,11 @@ async function main() {
     }
 
     cursorPosition = line;
-    // need to loop through x id's building up an array
-    // once you hit x
-    //    -> get the resource types from postgres - done
-    //    -> get the objects from hapi-fhir - done
-    //    -> build up the message and post to kafka
-    //    -> flush the cursor - done
     ids.push(line);
-    if (ids.length >= 2) {
+    if (ids.length >= Number(process.env.ID_BATCH_SIZE)) {
       await execute(ids);
       await flushCursor(cursorPosition);
+      console.log(`sent ${ids.length} records`);
       ids = [];
     }
   }
@@ -38,7 +33,11 @@ async function main() {
   // process end of file batch
   if (ids.length > 0) {
     await execute(ids);
+    console.log(`sent ${ids.length} records`);
   }
 }
 
-main();
+main().finally(() => {
+  flushCursor('');
+  shutdown()
+});
