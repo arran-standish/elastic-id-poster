@@ -39,5 +39,5 @@ async function main() {
 
 main().finally(() => {
   flushCursor('');
-  shutdown()
+  shutdown();
 });
