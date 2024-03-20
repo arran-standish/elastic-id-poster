@@ -43,14 +43,22 @@ function promisfyHapiGet(resourceTuple) {
 
 export async function getResourceData(resourceTuples) {
   const promises = [];
+  const deletes = [];
   for (const resourceTuple of resourceTuples) {
-    promises.push(promisfyHapiGet(resourceTuple));
+    const { res_deleted_at } = resourceTuple;
+    if (res_deleted_at == null) promises.push(promisfyHapiGet(resourceTuple));
+    else deletes.push({
+      request: {
+        method: 'DELETE',
+        url: `${resourceTuple.resource_type}/${resourceTuple.forced_id}`
+      }
+    });
   };
 
   // what happens if we throw over here
   // does it bubble up to the caller? it would right...
   const responses = await Promise.all(promises);
-  return responses.filter(response => response && response.resource);
+  return [deletes, responses.filter(response => response && response.resource)];
 }
 
 export function shutdown() {
